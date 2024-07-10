@@ -1,3 +1,4 @@
 # Miniproject
 
-## The project aims to reduce searching for stuff on the internet by going through multiple links, rather it searches the internet itself and provides us with an answer for our query
+- This projects aims to reduce web searching times by going through multiple related links and providing you with a summary for your query
+- This is still a work in progress
