@@ -1,10 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import os
+from dotenv import load_dotenv
 
-# Replace 'YOUR_API_KEY' and 'YOUR_SEARCH_ENGINE_ID' with your actual API key and Search Engine ID
-API_KEY = 'AIzaSyCRfPE6noHguT5nrXQvBXN7SRrFHBqM9GY'
-SEARCH_ENGINE_ID = '20ac1cd0a17f047f1'
+load_dotenv()
+
+API_KEY = os.environ["API_KEY"]
+SEARCH_ENGINE_ID = os.environ["SEARCH_ENGINE_ID"]
+
 
 def google_search(search_term, api_key, search_engine_id):
     url = f'https://www.googleapis.com/customsearch/v1?q={search_term}&key={api_key}&cx={search_engine_id}'
