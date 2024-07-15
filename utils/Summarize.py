@@ -3,10 +3,10 @@ from bs4 import BeautifulSoup
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
-import nltk
+# import nltk
 
 # Download the punkt tokenizer
-nltk.download('punkt')
+# nltk.download('punkt')
 
 # Function to fetch and extract paragraphs from a URL
 def fetch_and_extract_paragraphs(url):
