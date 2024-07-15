@@ -6,18 +6,15 @@ from bs4 import BeautifulSoup
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
-
-load_dotenv()
-
-API_KEY = os.environ["API_KEY"]
-SEARCH_ENGINE_ID = os.environ["SEARCH_ENGINE_ID"]
+import aiohttp
 
 
-def google_search(search_term, api_key, search_engine_id):
+async def search_query(search_term, api_key, search_engine_id):
     url = f'https://www.googleapis.com/customsearch/v1?q={search_term}&key={api_key}&cx={search_engine_id}'
-    response = requests.get(url)
-    results = response.json()
-    return results
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            results = await response.json()
+            return results
 
 def extract_links(search_results):
     links = []
@@ -31,29 +28,27 @@ def save_links_to_file(links, filename='output.txt'):
             file.write(link + '\n')
 
 # Function to fetch and extract paragraphs from a URL
-def fetch_and_extract_paragraphs(url):
-    # Fetch the webpage
-    response = requests.get(url)
-    
-    # Check if the request was successful
-    if response.status_code != 200:
-        print(f"Failed to retrieve the page. Status code: {response.status_code}")
-        return None
-    
-    # Parse the HTML content
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # Find all paragraph tags
-    paragraphs = soup.find_all('p')
-    
-    # Extract and return the text from each paragraph
-    content = [para.get_text() for para in paragraphs]
-    return content
 
-# Function to summarize text
-def summarize_text(text, num_sentences=5):
+async def fetch_and_extract_paragraphs(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                print(f"Failed to retrieve the page. Status code: {response.status}")
+                return ""
+            
+            soup = BeautifulSoup(await response.text(), 'html.parser')
+            paragraphs = soup.find_all('p')
+            return "\n".join(para.get_text() for para in paragraphs)
+
+def get_summarizer():
+    return LsaSummarizer()
+
+def get_parser(text, lang='english'):
+    return PlaintextParser.from_string(text, Tokenizer(lang))
+
+def summarize_text(text, summarizer, num_sentences=5):
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    summarizer = LsaSummarizer()
+    # summarizer = LsaSummarizer()
     
     summary = summarizer(parser.document, num_sentences)
     summarized_text = ' '.join([str(sentence) for sentence in summary])
@@ -62,7 +57,7 @@ def summarize_text(text, num_sentences=5):
 if __name__ == '__main__':
     # search_term = input('Enter the search string: ')
     search_term = "How to build an ai bot"
-    search_results = google_search(search_term, API_KEY, SEARCH_ENGINE_ID)
+    # search_results = search_query(search_term, API_KEY, SEARCH_ENGINE_ID)
     links = extract_links(search_results)
     save_links_to_file(links)
     print(f'Saved {len(links)} links to output.txt')
