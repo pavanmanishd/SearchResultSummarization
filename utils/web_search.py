@@ -34,7 +34,7 @@ async def fetch_and_extract_paragraphs(url):
         async with session.get(url) as response:
             if response.status != 200:
                 print(f"Failed to retrieve the page. Status code: {response.status}")
-                return ""
+                return None
             
             soup = BeautifulSoup(await response.text(), 'html.parser')
             paragraphs = soup.find_all('p')
