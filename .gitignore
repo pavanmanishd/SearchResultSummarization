@@ -1,2 +1,5 @@
 .env
 text_corpus.txt
+__pycache__/
+*.pyc
+output.txt

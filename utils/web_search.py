@@ -7,6 +7,8 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 import aiohttp
+import re
+import json
 
 
 async def search_query(search_term, api_key, search_engine_id):
@@ -40,13 +42,13 @@ async def fetch_and_extract_paragraphs(url):
             paragraphs = soup.find_all('p')
             return "\n".join(para.get_text() for para in paragraphs)
 
-def get_summarizer():
+def get_lsa_summarizer():
     return LsaSummarizer()
 
 def get_parser(text, lang='english'):
     return PlaintextParser.from_string(text, Tokenizer(lang))
 
-def summarize_text(text, summarizer, num_sentences=5):
+def lsa_summarize_text(text, summarizer, num_sentences=5):
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
     # summarizer = LsaSummarizer()
     
@@ -54,11 +56,35 @@ def summarize_text(text, summarizer, num_sentences=5):
     summarized_text = ' '.join([str(sentence) for sentence in summary])
     return summarized_text
 
-if __name__ == '__main__':
-    # search_term = input('Enter the search string: ')
-    search_term = "How to build an ai bot"
-    # search_results = search_query(search_term, API_KEY, SEARCH_ENGINE_ID)
-    links = extract_links(search_results)
-    save_links_to_file(links)
-    print(f'Saved {len(links)} links to output.txt')
-    print("This line is inserted in vim editor")
+def clean_text_corpus(corpus):
+    # text = corpus.replace('\r', ' ')
+    text = corpus
+    text = re.sub(r'[^A-Za-z\s]', '', text)
+    text = ' '.join(text.split())
+    return text
+
+
+def llm_summarize(text, search_query, num_words=500):
+    url = "http://localhost:11434/api/generate"
+    body = {
+        "model": "llama3.1:8b",
+        "prompt": f"Given the following data scraped from the internet on the given query \"{search_query}\" \n Data scraped from the internet : {text} \n \
+        Give a summary of the search in about {num_words} words don't use any html tags or special characters, give the search result in steps if it has a process and give a paragraph if it is a general question. \
+        Generate the summary as if you are giving the search response. Phrase it as you are speaking. \
+        Also assume the user does not have pre-requisite knowledge on the search query. \
+        If the generated response needs to be larger to make the user understand things, don't worry about the word count, you can cross it." 
+    }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    res = requests.post(url, headers=headers, data=json.dumps(body))
+
+    res = str(res.content, encoding='utf-8')
+    summary = ""
+    for i in res.split('\n'):
+        d = json.loads(i)
+        if d["done"]:
+            break
+        # print(d["response"], end="")
+        summary += d['response']
+    return summary
