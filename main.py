@@ -2,14 +2,12 @@ import os
 from dotenv import load_dotenv
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import threading
 
 from utils.web_search import (
     search_query,
     extract_links,
     fetch_and_extract_paragraphs,
-    get_lsa_summarizer,
-    lsa_summarize_text,
-    get_parser,
     clean_text_corpus,
     llm_summarize,
     save_links_to_file
@@ -22,22 +20,27 @@ SEARCH_ENGINE_ID = os.environ["SEARCH_ENGINE_ID"]
 
 text_corpus = ""
 
-def fetch_data(link):
+def fetch_data(link, results):
     content = asyncio.run(fetch_and_extract_paragraphs(link))
-    return content
+    # return content
+    results.append(content)
 
-async def main():
+def main():
     search_string = input('Enter a search query: ')
     
-    search_result = await search_query(search_string, API_KEY, SEARCH_ENGINE_ID)
+    search_result = asyncio.run(search_query(search_string, API_KEY, SEARCH_ENGINE_ID))
     links = extract_links(search_result)
     save_links_to_file(links)
 
-    # Use ThreadPoolExecutor to fetch data concurrently
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(fetch_data, link) for link in links]
-        results = [future.result() for future in futures]
-
+    results = []
+    threads = []
+    for link in links:
+        thread = threading.Thread(target=fetch_data, args=[link, results])
+        thread.start()
+        threads.append(thread)
+    for thread in threads:
+        thread.join()
+    
     global text_corpus
     text_corpus = "\n".join(filter(None, results))
 
@@ -50,7 +53,9 @@ async def main():
 
     summary = llm_summarize(text=text_corpus, search_query=search_string)
 
-    print(summary)
+    # print(summary)
+    with open("summary.md", "w") as f:
+        f.write(summary)
 
     # parser = get_parser(text_corpus)
     # summarizer = get_lsa_summarizer()
@@ -61,4 +66,4 @@ async def main():
     # print(summary)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

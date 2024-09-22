@@ -32,15 +32,18 @@ def save_links_to_file(links, filename='output.txt'):
 # Function to fetch and extract paragraphs from a URL
 
 async def fetch_and_extract_paragraphs(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status != 200:
-                print(f"Failed to retrieve the page. Status code: {response.status}")
-                return None
-            
-            soup = BeautifulSoup(await response.text(), 'html.parser')
-            paragraphs = soup.find_all('p')
-            return "\n".join(para.get_text() for para in paragraphs)
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    print(f"Failed to retrieve the page. Status code: {response.status}")
+                    return None
+                
+                soup = BeautifulSoup(await response.text(), 'html.parser')
+                paragraphs = soup.find_all('p')
+                return "\n".join(para.get_text() for para in paragraphs)
+    except:
+        pass
 
 def get_lsa_summarizer():
     return LsaSummarizer()
@@ -71,8 +74,9 @@ def llm_summarize(text, search_query, num_words=500):
         "prompt": f"Given the following data scraped from the internet on the given query \"{search_query}\" \n Data scraped from the internet : {text} \n \
         Give a summary of the search in about {num_words} words don't use any html tags or special characters, give the search result in steps if it has a process and give a paragraph if it is a general question. \
         Generate the summary as if you are giving the search response. Phrase it as you are speaking. \
+        If the data from the net doesn't seem relevant to the search query, use your own knowledge to make the answer relevant to the search query. \
         Also assume the user does not have pre-requisite knowledge on the search query. \
-        If the generated response needs to be larger to make the user understand things, don't worry about the word count, you can cross it." 
+        If the generated response needs to be larger to make the user understand things, don't worry about the word count, you can cross it. \ "
     }
     headers = {
         'Content-Type': 'application/json'
