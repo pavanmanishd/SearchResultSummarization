@@ -10,9 +10,6 @@
     "type": "git",
     "url": "git@github.com-personal:dhanushkunchakuri/Miniproject.git"
   },
-  "dependencies": {
-    "vite": "^2.4.4"
-  },
   "author": "",
   "license": "ISC"
 }
