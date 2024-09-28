@@ -3,9 +3,6 @@ import os
 from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
 import aiohttp
 import re
 import json
@@ -13,10 +10,8 @@ import json
 
 async def search_query(search_term, api_key, search_engine_id):
     url = f'https://www.googleapis.com/customsearch/v1?q={search_term}&key={api_key}&cx={search_engine_id}'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            results = await response.json()
-            return results
+    results = requests.get(url, verify=False).json()
+    return results
 
 def extract_links(search_results):
     links = []
@@ -44,20 +39,6 @@ async def fetch_and_extract_paragraphs(url):
                 return "\n".join(para.get_text() for para in paragraphs)
     except:
         pass
-
-def get_lsa_summarizer():
-    return LsaSummarizer()
-
-def get_parser(text, lang='english'):
-    return PlaintextParser.from_string(text, Tokenizer(lang))
-
-def lsa_summarize_text(text, summarizer, num_sentences=5):
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    # summarizer = LsaSummarizer()
-    
-    summary = summarizer(parser.document, num_sentences)
-    summarized_text = ' '.join([str(sentence) for sentence in summary])
-    return summarized_text
 
 def clean_text_corpus(corpus):
     # text = corpus.replace('\r', ' ')

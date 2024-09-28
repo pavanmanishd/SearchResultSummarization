@@ -1,0 +1,15 @@
+{
+  "name": "miniproject",
+  "version": "1.0.0",
+  "description": "- This projects aims to reduce web searching times by going through multiple related links and providing you with a summary for your query - This is still a work in progress",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-personal:dhanushkunchakuri/Miniproject.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
