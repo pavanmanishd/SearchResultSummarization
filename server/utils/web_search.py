@@ -7,11 +7,12 @@ import aiohttp
 import re
 import json
 
-
 async def search_query(search_term, api_key, search_engine_id):
     url = f'https://www.googleapis.com/customsearch/v1?q={search_term}&key={api_key}&cx={search_engine_id}'
-    results = requests.get(url, verify=False).json()
-    return results
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, ssl=False) as response:
+            results = await response.json()
+            return results
 
 def extract_links(search_results):
     links = []
@@ -48,16 +49,14 @@ def clean_text_corpus(corpus):
     return text
 
 
-def llm_summarize(text, search_query, num_words=500):
+def llm_summarize(text, search_query, num_words=750):
     url = "http://localhost:11434/api/generate"
     body = {
         "model": "llama3.1:8b",
-        "prompt": f"Given the following data scraped from the internet on the given query \"{search_query}\" \n Data scraped from the internet : {text} \n \
-        Give a summary of the search in about {num_words} words don't use any html tags or special characters, give the search result in steps if it has a process and give a paragraph if it is a general question. \
-        Generate the summary as if you are giving the search response. Phrase it as you are speaking. \
-        If the data from the net doesn't seem relevant to the search query, use your own knowledge to make the answer relevant to the search query. \
-        Also assume the user does not have pre-requisite knowledge on the search query. \
-        If the generated response needs to be larger to make the user understand things, don't worry about the word count, you can cross it. \ "
+        "prompt": f"Given the following data scraped from the internet on the given query:  \"{search_query}\" \n Data scraped from the internet : {text} \n \
+        Give a summary of the search in about {num_words} words don't use any special characters, give the search result in steps if it has a process and give a paragraph if it is a general question. \
+        If the data from the internet doesn't seem relevant to the search query, use your own knowledge to make the answer relevant to the search query. \
+        Use markup to generate the response, do NOT use any html tags."
     }
     headers = {
         'Content-Type': 'application/json'

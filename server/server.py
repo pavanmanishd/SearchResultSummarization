@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import asyncio
 import uvicorn
 from concurrent.futures import ThreadPoolExecutor
+import time
 
 from utils.web_search import (
     search_query,
@@ -47,9 +48,10 @@ async def summarize(search_request: SearchRequest):
     # Search the web and extract links
     print(f"Searching for: {search_string}")
     try:
+        start = time.time()
         search_result = await search_query(search_string, API_KEY, SEARCH_ENGINE_ID)
         links = extract_links(search_result)
-        save_links_to_file(links)
+        # save_links_to_file(links)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -63,10 +65,14 @@ async def summarize(search_request: SearchRequest):
     # Combine and clean the text corpus
     text_corpus = "\n".join(filter(None, results))
     cleaned_text = clean_text_corpus(text_corpus)
-    with open("text_corpus.txt", "w") as tf:
-        tf.write(cleaned_text)
+    print("Time for scraping: ", time.time()-start)
+    # with open("text_corpus.txt", "w") as tf:
+    #     tf.write(cleaned_text)
 
     summary = llm_summarize(text=text_corpus, search_query=search_string)
+
+    with open("output.txt", 'w') as f:
+        f.write(summary)
     
     # Return the result as a JSON response
     return {
