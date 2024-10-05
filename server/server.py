@@ -13,7 +13,8 @@ from utils.web_search import (
     extract_links,
     fetch_and_extract_paragraphs,
     clean_text_corpus,
-    llm_summarize,
+    llm_summarize_llama,
+    gemini_summarizer,
     save_links_to_file
 )
 
@@ -38,8 +39,11 @@ class SearchRequest(BaseModel):
     query: str
 
 def fetch_data(link):
-    content = asyncio.run(fetch_and_extract_paragraphs(link))
-    return content
+    try:
+        content = asyncio.run(fetch_and_extract_paragraphs(link))
+        return content
+    except:
+        return None
 
 @app.post("/summarize")
 async def summarize(search_request: SearchRequest):
@@ -51,7 +55,7 @@ async def summarize(search_request: SearchRequest):
         start = time.time()
         search_result = await search_query(search_string, API_KEY, SEARCH_ENGINE_ID)
         links = extract_links(search_result)
-        # save_links_to_file(links)
+        save_links_to_file(links)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -69,9 +73,9 @@ async def summarize(search_request: SearchRequest):
     # with open("text_corpus.txt", "w") as tf:
     #     tf.write(cleaned_text)
 
-    summary = llm_summarize(text=text_corpus, search_query=search_string)
+    summary = llm_summarize_llama(text=text_corpus, search_query=search_string)
 
-    with open("output.txt", 'w') as f:
+    with open("summary.txt", 'w') as f:
         f.write(summary)
     
     # Return the result as a JSON response

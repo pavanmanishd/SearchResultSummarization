@@ -49,7 +49,7 @@ def clean_text_corpus(corpus):
     return text
 
 
-def llm_summarize(text, search_query, num_words=750):
+def llm_summarize_llama(text, search_query, num_words=750):
     url = "http://localhost:11434/api/generate"
     body = {
         "model": "llama3.1:8b",
@@ -72,3 +72,30 @@ def llm_summarize(text, search_query, num_words=750):
         # print(d["response"], end="")
         summary += d['response']
     return summary
+
+def gemini_summarizer(text, search_query, num_words=750):
+    url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
+    params = {
+        'key': os.getenv('API_KEY')
+    }
+    prompt = f"Given the following data from the internet on the given query:  \"{search_query}\" \n Data from the internet : {text} \n \
+        Give a summary of the search in about {num_words} words. Don't use any special characters. \
+        If the data from the internet doesn't seem relevant to the search query, use your own knowledge to make the answer relevant to the search query. \
+        Use markup to generate the response, do NOT use any html tags."
+    body = {
+        'contents': [
+            {
+                'parts': [{
+                    'text': prompt
+                }]
+            }
+        ]
+    }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    res = requests.post(url, headers=headers, params=params, data=json.dumps(body))
+    res = res.json()
+    result = res['candidates'][0]['content']['parts'][0]['text']
+
+    return result
