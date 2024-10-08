@@ -1,0 +1,33 @@
+.llm-select-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.llm-select-list select {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    color: #2c3e50;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+}
+
+.llm-select-list select:focus {
+    border-color: #3498db;
+    background-color: #ecf6fd;
+}
+
+.llm-select-list select:hover {
+    background-color: #f0f0f0;
+}
+
+.llm-select-list option {
+    padding: 10px;
+    color: #555;
+}

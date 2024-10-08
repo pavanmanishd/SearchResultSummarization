@@ -54,7 +54,7 @@ def llm_summarize_llama(text, search_query, num_words=750):
     body = {
         "model": "llama3.1:8b",
         "prompt": f"Given the following data scraped from the internet on the given query:  \"{search_query}\" \n Data scraped from the internet : {text} \n \
-        Give a summary of the search in about {num_words} words don't use any special characters, give the search result in steps if it has a process and give a paragraph if it is a general question. \
+        Give a summary of the search in about {num_words} words don't use any special characters. \
         If the data from the internet doesn't seem relevant to the search query, use your own knowledge to make the answer relevant to the search query. \
         Use markup to generate the response, do NOT use any html tags."
     }
@@ -99,3 +99,9 @@ def gemini_summarizer(text, search_query, num_words=750):
     result = res['candidates'][0]['content']['parts'][0]['text']
 
     return result
+
+def llm_summarize(text, search_query, num_words=750, llm="Llama3.1"):
+    if llm=="Llama 3.1":
+        return llm_summarize_llama(text, search_query, num_words)
+    elif llm=="Gemini":
+        return gemini_summarizer(text, search_query, num_words)

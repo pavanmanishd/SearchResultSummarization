@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 import { SearchResult } from '../searchResult/searchResult';
-import './styles.css'; // Assuming you import the styles from an external file
+import { LlmSelectList } from '../llmSelectList/llmSelectList';
+import { llmOptions } from '../../constants';
+import './styles.css';
 
 export const SearchPage = () => {
     const [query, setQuery] = useState('');
     const [searchResponse, setSearchResponse] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selectedLlm, setSelectedLlm] = useState(llmOptions[0]);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (event) => {
         setQuery(event.target.value);
+        if (event.target.value.trim() !== '') {
+            setErrorMessage('');
+        }
     }
 
     const handleSubmit = () => {
+        if (query.trim() === '') {
+            setErrorMessage('Please enter a query');
+            return;
+        }
         setLoading(true);
         const api = 'http://localhost:8000/summarize';
         const body = {
-            query: query 
+            query: query,
+            llm: selectedLlm
         };
         fetch(api, {
             method: 'POST',
@@ -26,6 +38,7 @@ export const SearchPage = () => {
         })
         .then(response => response.json())
         .then(data => {
+            console.log(data);
             setSearchResponse(data.summary);
             setLoading(false);
         })
@@ -45,10 +58,12 @@ export const SearchPage = () => {
                     value={query} 
                     onChange={handleChange} 
                 />
+                <p id="errorMessage" className='error-message'>{errorMessage}</p>
                 <div className="button-group">
                     <button className="search-btn" onClick={handleSubmit}>Search</button>
                     <button className="clear-btn" onClick={() => setQuery('')}>Clear</button>
                     <button className="clear-result-btn" onClick={() => setSearchResponse('')}>Clear Result</button>
+                    <LlmSelectList selected={selectedLlm} setSelected={setSelectedLlm} options={llmOptions}/>
                 </div>
             </div>
             {loading ? (

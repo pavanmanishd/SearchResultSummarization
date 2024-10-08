@@ -1,0 +1,1 @@
+export const llmOptions = ["Llama 3.1", "Gemini"];

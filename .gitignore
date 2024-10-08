@@ -5,3 +5,4 @@ __pycache__/
 output.txt
 node_modules/
 *.pyc
+*/summary.txt
