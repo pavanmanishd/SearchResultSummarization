@@ -1,31 +1,40 @@
 import React from 'react';
-import '../../index.css';
+import './styles.css';
 
-
-export const Metrics = ({metrics}) => {
+export const Metrics = ({ metrics }) => {
     return (
         <div className="metrics">
-            <h2>Metrics</h2>
-            <div className="metric">
-                <h3>Compression Ratio</h3>
-                <p>{metrics.compression_ratio}</p>
-            </div>
-            <div className="metric">
-                <h3>Precision</h3>
-                <p>{metrics.precision}</p>
-            </div>
-            <div className="metric">
-                <h3>Recall</h3>
-                <p>{metrics.recall}</p>
-            </div>
-            <div className="metric">
-                <h3>F1 Score</h3>
-                <p>{metrics.f1_score}</p>
-            </div>
-            <div className="metric">
-                <h3>Cosine Similarity</h3>
-                <p>{metrics.cosine_similarity}</p>
-            </div>
+            <h2 className="metrics-title">Metrics</h2>
+            <table className="metrics-table">
+                <thead>
+                    <tr className="metrics-table-header">
+                        <th className="metrics-table-cell">Metric</th>
+                        <th className="metrics-table-cell">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr className="metrics-table-row">
+                        <td className="metrics-table-cell">Compression Ratio</td>
+                        <td className="metrics-table-cell">{metrics.compression_ratio}</td>
+                    </tr>
+                    <tr className="metrics-table-row">
+                        <td className="metrics-table-cell">Precision</td>
+                        <td className="metrics-table-cell">{metrics.precision}</td>
+                    </tr>
+                    <tr className="metrics-table-row">
+                        <td className="metrics-table-cell">Recall</td>
+                        <td className="metrics-table-cell">{metrics.recall}</td>
+                    </tr>
+                    <tr className="metrics-table-row">
+                        <td className="metrics-table-cell">F1 Score</td>
+                        <td className="metrics-table-cell">{metrics.f1_score}</td>
+                    </tr>
+                    <tr className="metrics-table-row">
+                        <td className="metrics-table-cell">Cosine Similarity</td>
+                        <td className="metrics-table-cell">{metrics.cosine_similarity}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 }

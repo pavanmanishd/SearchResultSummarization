@@ -52,7 +52,7 @@ export const SearchPage = () => {
     }
 
     return (
-        <div>
+        <div className='search-results-and-metrics'>
             <div className="search-page">
                 <div className="search-inputs">
                     <input
