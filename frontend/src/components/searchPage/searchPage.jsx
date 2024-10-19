@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SearchResult } from '../searchResult/searchResult';
 import { LlmSelectList } from '../llmSelectList/llmSelectList';
 import { llmOptions } from '../../constants';
+import { Metrics } from '../Metrics/metrics';
 import './styles.css';
 
 export const SearchPage = () => {
@@ -10,6 +11,7 @@ export const SearchPage = () => {
     const [loading, setLoading] = useState(false);
     const [selectedLlm, setSelectedLlm] = useState(llmOptions[0]);
     const [errorMessage, setErrorMessage] = useState('');
+    const [metrics, setMetrics] = useState({});
 
     const handleChange = (event) => {
         setQuery(event.target.value);
@@ -40,6 +42,7 @@ export const SearchPage = () => {
         .then(data => {
             console.log(data);
             setSearchResponse(data.summary);
+            setMetrics(data.metrics);
             setLoading(false);
         })
         .catch((error) => {
@@ -49,28 +52,33 @@ export const SearchPage = () => {
     }
 
     return (
-        <div className="search-page">
-            <div className="search-inputs">
-                <input 
-                    type="text" 
-                    className="query-input"
-                    placeholder="Enter your query" 
-                    value={query} 
-                    onChange={handleChange} 
-                />
-                <p id="errorMessage" className='error-message'>{errorMessage}</p>
-                <div className="button-group">
-                    <button className="search-btn" onClick={handleSubmit}>Search</button>
-                    <button className="clear-btn" onClick={() => setQuery('')}>Clear</button>
-                    <button className="clear-result-btn" onClick={() => setSearchResponse('')}>Clear Result</button>
-                    <LlmSelectList selected={selectedLlm} setSelected={setSelectedLlm} options={llmOptions}/>
+        <div>
+            <div className="search-page">
+                <div className="search-inputs">
+                    <input
+                        type="text"
+                        className="query-input"
+                        placeholder="Enter your query"
+                        value={query}
+                        onChange={handleChange}
+                    />
+                    <p id="errorMessage" className='error-message'>{errorMessage}</p>
+                    <div className="button-group">
+                        <button className="search-btn" onClick={handleSubmit}>Search</button>
+                        <button className="clear-btn" onClick={() => setQuery('')}>Clear</button>
+                        <button className="clear-result-btn" onClick={() => setSearchResponse('')}>Clear Result</button>
+                        <LlmSelectList selected={selectedLlm} setSelected={setSelectedLlm} options={llmOptions}/>
+                    </div>
                 </div>
+                {loading ? (
+                    <div className="loading-screen">Loading...</div>
+                ) : (
+                    <SearchResult content={searchResponse} />
+                )}
             </div>
-            {loading ? (
-                <div className="loading-screen">Loading...</div>
-            ) : (
-                <SearchResult content={searchResponse} />
-            )}
+            <div>
+                <Metrics metrics={metrics} />
+            </div>
         </div>
     );
 }
