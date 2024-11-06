@@ -7,6 +7,11 @@ import aiohttp
 import re
 import json
 
+import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 async def search_query(search_term, api_key, search_engine_id):
     url = f'https://www.googleapis.com/customsearch/v1?q={search_term}&key={api_key}&cx={search_engine_id}'
     async with aiohttp.ClientSession() as session:
@@ -44,7 +49,7 @@ async def fetch_and_extract_paragraphs(url):
 def clean_text_corpus(corpus):
     # text = corpus.replace('\r', ' ')
     text = corpus
-    text = re.sub(r'[^A-Za-z\s]', '', text)
+    text = re.sub(r'[^A-Za-z0-9\s.,!?;:]', '', text)
     text = ' '.join(text.split())
     return text
 
@@ -105,3 +110,33 @@ def llm_summarize(text, search_query, num_words=750, llm="Llama3.1"):
         return llm_summarize_llama(text, search_query, num_words)
     elif llm=="Gemini":
         return gemini_summarizer(text, search_query, num_words)
+    
+def cal_metrics(actual_text, summary):
+    if not isinstance(actual_text, str) or not isinstance(summary, str):
+        raise ValueError("Both actual_text and summary must be strings.")
+    
+    compression_ratio = len(summary) / len(actual_text) if len(actual_text) > 0 else 0
+    
+    actual_words = actual_text.split()
+    summary_words = summary.split()
+    
+    common_words = list(set(actual_words + summary_words))
+    
+    y_true = np.array([1 if word in actual_words else 0 for word in common_words])
+    y_pred = np.array([1 if word in summary_words else 0 for word in common_words])
+
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    
+    vectorizer = TfidfVectorizer().fit_transform([actual_text, summary])
+    vectors = vectorizer.toarray()
+    
+    cosine_sim = cosine_similarity(vectors)[0, 1]
+
+    metrics = {
+        'compression_ratio': round(compression_ratio, 2),
+        'precision': round(precision, 2),
+        'cosine_similarity': round(cosine_sim, 2)
+    }
+    
+    return metrics
+

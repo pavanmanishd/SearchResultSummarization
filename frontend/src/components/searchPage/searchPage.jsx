@@ -26,6 +26,9 @@ export const SearchPage = () => {
             return;
         }
         setLoading(true);
+        setErrorMessage('');
+        setSearchResponse('');
+        setMetrics({});
         const api = 'http://localhost:8000/summarize';
         const body = {
             query: query,
@@ -66,7 +69,10 @@ export const SearchPage = () => {
                     <div className="button-group">
                         <button className="search-btn" onClick={handleSubmit}>Search</button>
                         <button className="clear-btn" onClick={() => setQuery('')}>Clear</button>
-                        <button className="clear-result-btn" onClick={() => setSearchResponse('')}>Clear Result</button>
+                        <button className="clear-result-btn" onClick={() => {
+                            setSearchResponse('')
+                            setMetrics({})
+                            }}>Clear Result</button>
                         <LlmSelectList selected={selectedLlm} setSelected={setSelectedLlm} options={llmOptions}/>
                     </div>
                 </div>

@@ -14,7 +14,9 @@ from utils.web_search import (
     fetch_and_extract_paragraphs,
     clean_text_corpus,
     llm_summarize,
-    save_links_to_file
+    save_links_to_file,
+    cal_metrics
+
 )
 
 load_dotenv()
@@ -74,6 +76,7 @@ async def summarize(search_request: SearchRequest):
     #     tf.write(cleaned_text)
 
     summary = llm_summarize(text=text_corpus, search_query=search_string, llm=search_request.llm)
+    metrics = cal_metrics(text_corpus, summary)
 
     with open("summary.txt", 'w') as f:
         f.write(summary)
@@ -83,7 +86,8 @@ async def summarize(search_request: SearchRequest):
         "original_length": len(text_corpus),
         "cleaned_length": len(cleaned_text),
         "llm_used": search_request.llm,
-        "summary": summary
+        "summary": summary,
+        "metrics": metrics
     }
 
 if __name__ == "__main__":
